@@ -24,7 +24,8 @@ if sys.version_info[0] < 3:
 def load_checkpoints(config_path, checkpoint_path, cpu=False):
 
     with open(config_path) as f:
-        config = yaml.load(f)
+        config = yaml.safe_load(f)
+
     if opt.kp_num != -1:
         config['model_params']['common_params']['num_kp'] = opt.kp_num
     generator = getattr(GEN, opt.generator)(**config['model_params']['generator_params'],**config['model_params']['common_params'])
@@ -138,7 +139,8 @@ if __name__ == "__main__":
 
     parser.add_argument("--source_image", default='sup-mat/source.png', help="path to source image")
     parser.add_argument("--driving_video", default='sup-mat/source.png', help="path to driving video")
-    parser.add_argument("--result_video", default='result.mp4', help="path to output")
+    parser.add_argument("--result_video", default='/content/drive/MyDrive/DaGAN/reslut/result.mp4', help="path to output")
+
     
     parser.add_argument("--relative", dest="relative", action="store_true", help="use relative or absolute keypoint coordinates")
     parser.add_argument("--adapt_scale", dest="adapt_scale", action="store_true", help="adapt movement scale based on convex hull of keypoints")
@@ -162,16 +164,16 @@ if __name__ == "__main__":
 
     depth_encoder = depth.ResnetEncoder(18, False)
     depth_decoder = depth.DepthDecoder(num_ch_enc=depth_encoder.num_ch_enc, scales=range(4))
-    loaded_dict_enc = torch.load('/content/drive/MyDrive/DaGAN/Weights_19/encoder.pth')
-    loaded_dict_dec = torch.load('/content/drive/MyDrive/DaGAN/Weights_19/depth.pth')
+    loaded_dict_enc = torch.load('/content/drive/MyDrive/DaGAN/Weights_19/encoder.pth', map_location=torch.device('cpu'))
+    loaded_dict_dec = torch.load('/content/drive/MyDrive/DaGAN/Weights_19/depth.pth', map_location=torch.device('cpu'))
     filtered_dict_enc = {k: v for k, v in loaded_dict_enc.items() if k in depth_encoder.state_dict()}
     depth_encoder.load_state_dict(filtered_dict_enc)
     depth_decoder.load_state_dict(loaded_dict_dec)
     depth_encoder.eval()
     depth_decoder.eval()
-    if not opt.cpu:
-        depth_encoder.cuda()
-        depth_decoder.cuda()
+    # if not opt.cpu:
+    #     depth_encoder.cuda()
+    #     depth_decoder.cuda()
 
     source_image = imageio.imread(opt.source_image)
     reader = imageio.get_reader(opt.driving_video)
