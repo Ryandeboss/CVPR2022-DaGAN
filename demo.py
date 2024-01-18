@@ -139,7 +139,7 @@ if __name__ == "__main__":
 
     parser.add_argument("--source_image", default='sup-mat/source.png', help="path to source image")
     parser.add_argument("--driving_video", default='sup-mat/source.png', help="path to driving video")
-    parser.add_argument("--result_video", default='/content/drive/MyDrive/DaGAN/reslut/result.mp4', help="path to output")
+    parser.add_argument("--result_video", default='/content/drive/MyDrive/DaGAN/result/result.mp4', help="path to output")
 
     
     parser.add_argument("--relative", dest="relative", action="store_true", help="use relative or absolute keypoint coordinates")
@@ -171,9 +171,9 @@ if __name__ == "__main__":
     depth_decoder.load_state_dict(loaded_dict_dec)
     depth_encoder.eval()
     depth_decoder.eval()
-    # if not opt.cpu:
-    #     depth_encoder.cuda()
-    #     depth_decoder.cuda()
+    if not opt.cpu:
+        depth_encoder.cuda()
+        depth_decoder.cuda()
 
     source_image = imageio.imread(opt.source_image)
     reader = imageio.get_reader(opt.driving_video)
